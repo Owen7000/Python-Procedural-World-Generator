@@ -29,6 +29,8 @@ for row in world:
 def get_tile_type_for_map(value:float):
     if value < 0.3:
         return (66, 135, 245) # Water
+    elif value < 0.4:
+        return (66, 197, 245) # Shallow Water
     elif value < 0.6:
         return (120, 250, 159) # Grass
     else:
