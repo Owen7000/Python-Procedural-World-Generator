@@ -1,4 +1,4 @@
-from random import random
+from random import randint
 from noise import pnoise2
 from PIL import Image
 from os import system
@@ -58,6 +58,40 @@ def get_lowest_neighbour(x:int, y:int, world:list[list[float]]):
                 
     return min(neighbours, key=lambda t: t[2])
 
+def generate_rivers(world:list[list[int]], count:int=20, max_length:int=200):
+    rivers = set()
+    
+    for _ in range(count):
+        # pick a random high point
+        while True:
+            x = randint(0, len(world[0]) - 1)
+            y = randint(0, len(world) - 1)
+            
+            if world[y][x] > 0.65:  # only start in high areas
+                break
+        
+        path = []
+        
+        for _ in range(max_length):
+            path.append((x, y))
+            
+            # stop if water is hit
+            if world[y][x] < 0.3:
+                break
+            
+            nx, ny, nh = get_lowest_neighbour(x, y, world)
+            
+            # stop if no downhill (prevents infinite loops)
+            if nh >= world[y][x]:
+                break
+                
+            x, y = nx, ny
+        
+        rivers.update(path)
+    
+    return rivers
+
+
 def apply_lighting(colour:tuple[int, int, int], light:float):
     return tuple(
         min(255, max(0, int(c + light * 255))) for c in colour
@@ -88,18 +122,24 @@ def get_tile_type_for_map(value: float):
     shade = 0.6 + (t * 0.6)
     return darken(base, shade)
 
-def save_map_to_file(world:list[list[int]], width:int, height:int):
+def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
     image = Image.new('RGB', (width, height), color=(0,0,0))
     pixels = image.load()
     
     for row_index, row in enumerate(world):
         for column_index, column in enumerate(row):
-            base_colour = get_tile_type_for_map(column)
+            if (column_index, row_index) in rivers:
+                base_colour = (30, 100, 200) # River Blue
+            else:
+                base_colour = get_tile_type_for_map(column)
+                
             light = get_light(column_index, row_index, world)
             final_colour = apply_lighting(base_colour, light)
             
             pixels[column_index, row_index] = final_colour
             
     image.save("output.png")
-            
-save_map_to_file(world, width, height)
+
+rivers = generate_rivers(world, count=30)
+
+save_map_to_file(world, width, height, rivers)
