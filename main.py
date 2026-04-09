@@ -61,6 +61,9 @@ def get_tile_type_for_map(value: float):
     elif value < 0.6:
         base = (50, 160, 60) # Grass
         t = (value - 0.4) / 0.2
+    elif value > 0.75:
+        base = (240, 240, 240)
+        t = (value - 0.6) / 0.4
     else:
         base = (120, 120, 120) # Mountain
         t = (value - 0.6) / 0.4
