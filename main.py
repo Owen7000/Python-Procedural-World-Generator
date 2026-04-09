@@ -28,13 +28,13 @@ for row in world:
 
 def get_tile_type_for_map(value:float):
     if value < 0.3:
-        return (66, 135, 245) # Water
+        return (10, 30, 120) # Water
     elif value < 0.4:
-        return (66, 197, 245) # Shallow Water
+        return (70, 130, 180) # Shallow Water
     elif value < 0.6:
-        return (120, 250, 159) # Grass
+        return (50, 160, 60) # Grass
     else:
-        return (232, 228, 169) # Mountain
+        return (120, 120, 120) # Mountain
     
 def save_map_to_file(world:list[list[int]], width:int, height:int):
     image = Image.new('RGB', (width, height), color=(0,0,0))
