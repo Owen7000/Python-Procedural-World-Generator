@@ -45,6 +45,8 @@ def get_tile_type_for_map(value: float):
     else:
         base = (120, 120, 120) # Mountain
         t = (value - 0.6) / 0.4
+        shade = 0.5 + (t * 0.9)
+        return darken(base, shade)
 
     shade = 0.6 + (t * 0.6)
     return darken(base, shade)
