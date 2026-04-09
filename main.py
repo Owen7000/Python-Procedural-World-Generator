@@ -58,6 +58,14 @@ def get_lowest_neighbour(x:int, y:int, world:list[list[float]]):
                 
     return min(neighbours, key=lambda t: t[2])
 
+def distance_to_river(x:int, y:int, rivers, max_dist:int=3):
+    for dx in range(-max_dist, max_dist + 1):
+        for dy in range(-max_dist, max_dist + 1):
+            nx, ny = x + dx, y + dy
+            if (nx, ny) in rivers:
+                return abs(dx) + abs(dy)
+    return None    
+
 def generate_rivers(world, count=30, max_length=300):
     flow_map = {}
     rivers = set()
