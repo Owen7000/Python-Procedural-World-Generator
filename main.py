@@ -36,6 +36,9 @@ def get_tile_type_for_map(value: float):
     elif value < 0.4:
         base = (70, 130, 180) # Shallow Water
         t = (value - 0.3) / 0.1
+    elif value < 0.45:
+        base =  (194, 178, 128)  # Sand
+        t = (value - 0.3) / 0.1
     elif value < 0.6:
         base = (50, 160, 60) # Grass
         t = (value - 0.4) / 0.2
