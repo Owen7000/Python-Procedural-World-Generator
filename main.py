@@ -1,5 +1,6 @@
 from random import random
 from noise import pnoise2
+from PIL import Image
 from os import system
 
 system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
@@ -24,3 +25,24 @@ def get_tile_type(value):
     
 for row in world:
     print("".join(get_tile_type(v) for v in row))
+
+def get_tile_type_for_map(value:float):
+    if value < 0.3:
+        return (66, 135, 245) # Water
+    elif value < 0.6:
+        return (120, 250, 159) # Grass
+    else:
+        return (232, 228, 169) # Mountain
+    
+def save_map_to_file(world:list[list[int]], width:int, height:int):
+    image = Image.new('RGB', (width, height), color=(0,0,0))
+    pixels = image.load()
+    
+    for row_index, row in enumerate(world):
+        for column_index, column in enumerate(row):
+            # print(column)
+            pixels[row_index, column_index] = get_tile_type_for_map(column)
+            
+    image.save("output.png")
+            
+save_map_to_file(world, width, height)
