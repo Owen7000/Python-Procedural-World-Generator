@@ -28,6 +28,25 @@ def get_tile_type(value):
 
 def darken(colour:tuple[int, int, int], factor:float):
     return tuple(min(255, max(0, int(c * factor))) for c in colour)
+
+def get_light(x:int, y:int, world:list[list[float]]):
+    height = world[y][x]
+    
+    left = world[y][x-1] if x > 0 else height
+    right = world[y][x+1] if x < len(world[0]) - 1 else height
+    up = world[y-1][x] if y > 0 else height
+    down = world[y+1][x] if y < len(world) - 1 else height 
+    
+    dx = right - left
+    dy = down - up
+    
+    light = (dx + dy) * 2.5
+    return light
+
+def apply_lighting(colour:tuple[int, int, int], light:float):
+    return tuple(
+        min(255, max(0, int(c + light * 255))) for c in colour
+    )  
     
 def get_tile_type_for_map(value: float):
     if value < 0.3:
@@ -57,8 +76,11 @@ def save_map_to_file(world:list[list[int]], width:int, height:int):
     
     for row_index, row in enumerate(world):
         for column_index, column in enumerate(row):
-            # print(column)
-            pixels[row_index, column_index] = get_tile_type_for_map(column)
+            base_colour = get_tile_type_for_map(column)
+            light = get_light(column_index, row_index, world)
+            final_colour = apply_lighting(base_colour, light)
+            
+            pixels[column_index, row_index] = final_colour
             
     image.save("output.png")
             
