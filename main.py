@@ -58,40 +58,47 @@ def get_lowest_neighbour(x:int, y:int, world:list[list[float]]):
                 
     return min(neighbours, key=lambda t: t[2])
 
-def generate_rivers(world:list[list[int]], count:int=20, max_length:int=200):
+def generate_rivers(world, count=30, max_length=300):
+    flow_map = {}
     rivers = set()
     
     for _ in range(count):
-        # pick a random high point
+        # pick a high starting point
         while True:
             x = randint(0, len(world[0]) - 1)
             y = randint(0, len(world) - 1)
-            
-            if world[y][x] > 0.65:  # only start in high areas
+            if world[y][x] > 0.65:
                 break
         
-        path = []
-        
         for _ in range(max_length):
-            path.append((x, y))
+            rivers.add((x, y))
+            flow_map[(x, y)] = flow_map.get((x, y), 0) + 1
             
-            # stop if water is hit
+            # stop at ocean
             if world[y][x] < 0.3:
                 break
             
             nx, ny, nh = get_lowest_neighbour(x, y, world)
             
-            # stop if no downhill (prevents infinite loops)
+            # If neighbours have rivers, they should combine into one river
+            if (nx, ny) in flow_map:
+                x, y = nx, ny
+                continue
+            
+            # If there is no downhill space, make a small lake
             if nh >= world[y][x]:
+                # create small lake
+                for dx in range(-2, 3):
+                    for dy in range(-2, 3):
+                        lx, ly = x + dx, y + dy
+                        if 0 <= lx < len(world[0]) and 0 <= ly < len(world):
+                            rivers.add((lx, ly))
+                            flow_map[(lx, ly)] = flow_map.get((lx, ly), 0) + 2
                 break
-                
+            
             x, y = nx, ny
-        
-        rivers.update(path)
     
-    return rivers
-
-
+    return rivers, flow_map
 def apply_lighting(colour:tuple[int, int, int], light:float):
     return tuple(
         min(255, max(0, int(c + light * 255))) for c in colour
@@ -129,7 +136,14 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
     for row_index, row in enumerate(world):
         for column_index, column in enumerate(row):
             if (column_index, row_index) in rivers:
-                base_colour = (30, 100, 200) # River Blue
+                flow = flow_map.get((column_index, row_index), 1)
+                
+                if flow > 6:
+                    base_colour = (20, 80, 180)   # big river
+                elif flow > 3:
+                    base_colour = (30, 100, 200)  # medium
+                else:
+                    base_colour = (50, 130, 220)  # small
             else:
                 base_colour = get_tile_type_for_map(column)
                 
@@ -140,6 +154,6 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
             
     image.save("output.png")
 
-rivers = generate_rivers(world, count=30)
+rivers, flow_map = generate_rivers(world, count=300)
 
 save_map_to_file(world, width, height, rivers)
