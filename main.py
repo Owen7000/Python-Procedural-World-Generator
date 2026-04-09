@@ -43,6 +43,21 @@ def get_light(x:int, y:int, world:list[list[float]]):
     light = (dx + dy) * 2.5
     return light
 
+def get_lowest_neighbour(x:int, y:int, world:list[list[float]]):    
+    neighbours:list[tuple[int, int, float]] = []
+    
+    for dx in [-1, 0, 1]:
+        for dy in [-1, 0, 1]:
+            nx, ny = x + dx, y + dy
+            
+            if (dx == 0 and dy == 0):
+                continue
+            
+            if 0 <= nx < len(world[0]) and 0 <= ny < len(world):
+                neighbours.append((nx, ny, world[ny][nx]))
+                
+    return min(neighbours, key=lambda t: t[2])
+
 def apply_lighting(colour:tuple[int, int, int], light:float):
     return tuple(
         min(255, max(0, int(c + light * 255))) for c in colour
