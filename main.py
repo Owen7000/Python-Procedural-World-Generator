@@ -23,19 +23,29 @@ def get_tile_type(value):
     else:
         return "\033[107m \033[0m" # Mountain
     
-for row in world:
-    print("".join(get_tile_type(v) for v in row))
+# for row in world:
+#     print("".join(get_tile_type(v) for v in row))
 
-def get_tile_type_for_map(value:float):
-    if value < 0.3:
-        return (10, 30, 120) # Water
-    elif value < 0.4:
-        return (70, 130, 180) # Shallow Water
-    elif value < 0.6:
-        return (50, 160, 60) # Grass
-    else:
-        return (120, 120, 120) # Mountain
+def darken(colour:tuple[int, int, int], factor:float):
+    return tuple(min(255, max(0, int(c * factor))) for c in colour)
     
+def get_tile_type_for_map(value: float):
+    if value < 0.3:
+        base = (10, 30, 120) # Water
+        t = value / 0.3
+    elif value < 0.4:
+        base = (70, 130, 180) # Shallow Water
+        t = (value - 0.3) / 0.1
+    elif value < 0.6:
+        base = (50, 160, 60) # Grass
+        t = (value - 0.4) / 0.2
+    else:
+        base = (120, 120, 120) # Mountain
+        t = (value - 0.6) / 0.4
+
+    shade = 0.6 + (t * 0.6)
+    return darken(base, shade)
+
 def save_map_to_file(world:list[list[int]], width:int, height:int):
     image = Image.new('RGB', (width, height), color=(0,0,0))
     pixels = image.load()
