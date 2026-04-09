@@ -62,7 +62,7 @@ def get_tile_type_for_map(value: float):
         base = (50, 160, 60) # Grass
         t = (value - 0.4) / 0.2
     elif value > 0.75:
-        base = (240, 240, 240)
+        base = (240, 240, 240) # Snow
         t = (value - 0.6) / 0.4
     else:
         base = (120, 120, 120) # Mountain
