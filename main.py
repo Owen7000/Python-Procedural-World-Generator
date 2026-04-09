@@ -1,11 +1,15 @@
 from random import random
+from noise import pnoise2
 
 width, height = 50, 50
 world = [[0 for _ in range(width)] for _ in range(height)]
 
+scale = 20.0
+
 for y in range(height):
     for x in range(width):
-        world[y][x] = random()
+        value = pnoise2(x/scale, y/scale)
+        world[y][x] = (value + 1) / 2
         
 def get_tile_type(value):
     if value < 0.3:
