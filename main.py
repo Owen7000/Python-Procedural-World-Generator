@@ -143,17 +143,26 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
     
     for row_index, row in enumerate(world):
         for column_index, column in enumerate(row):
-            if (column_index, row_index) in rivers:
-                flow = flow_map.get((column_index, row_index), 1)
+            x, y = column_index, row_index
+            
+            if (x, y) in rivers:
+                flow = flow_map.get((x, y), 1)
                 
                 if flow > 6:
-                    base_colour = (20, 80, 180)   # big river
+                    base_colour = (20, 80, 180)
                 elif flow > 3:
-                    base_colour = (30, 100, 200)  # medium
+                    base_colour = (30, 100, 200)
                 else:
-                    base_colour = (50, 130, 220)  # small
+                    base_colour = (50, 130, 220)
+                    
             else:
                 base_colour = get_tile_type_for_map(column)
+                
+                dist = distance_to_river(x, y, rivers, max_dist=3)
+                
+                if dist is not None:
+                    factor = 1 - (0.1 * (1 - dist / 3))
+                    base_colour = darken(base_colour, factor)              
                 
             light = get_light(column_index, row_index, world)
             final_colour = apply_lighting(base_colour, light)
@@ -162,6 +171,6 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
             
     image.save("output.png")
 
-rivers, flow_map = generate_rivers(world, count=300)
+rivers, flow_map = generate_rivers(world, count=10)
 
 save_map_to_file(world, width, height, rivers)
