@@ -67,3 +67,21 @@ python main.py
 
 4. Check the output
 The generated map will be saved as `output.png`
+
+## Examples
+This section contains examples that I think are cool or worth showing. I might be generous enough to add text to describe them, but likely will not.
+
+---
+
+These first three images show the same section of the map, in three different resolutions. Each one multiplies the height/width and the scale by the same amount. This way it is always the same part of the map. You can notice that the rivers are different each time. This is because they are not deterministic.
+
+![50x50px image with a scale of 20](examples/50x50-scale-20.png)
+
+![100x100px image with a scale of 40](examples/100x100-scale-40.png)
+
+![1000x1000px image with a scale of 400](examples/1000x1000-scale-400.png)
+
+---
+
+This last image shows a 1000px by 1000px example which I have a scale of 40 applied to. This means it is roughly the same visual scale as the second example image. Just with an extra 100x the map generated.
+![1000x1000px image with a scale of 40](examples/1000x1000-scale-40.png)
