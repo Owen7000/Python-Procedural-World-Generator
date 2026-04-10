@@ -5,10 +5,10 @@ from os import system
 
 system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
 
-width, height = 100, 100
+width, height = 1000, 1000
 world = [[0 for _ in range(width)] for _ in range(height)]
 
-scale = 20.0
+scale = 200.0
 
 for y in range(height):
     for x in range(width):
@@ -83,7 +83,7 @@ def generate_rivers(world, count=30, max_length=300):
             flow_map[(x, y)] = flow_map.get((x, y), 0) + 1
             
             # stop at ocean
-            if world[y][x] < 0.3:
+            if world[y][x] < 0.4:
                 break
             
             nx, ny, nh = get_lowest_neighbour(x, y, world)
@@ -112,7 +112,7 @@ def apply_lighting(colour:tuple[int, int, int], light:float):
         min(255, max(0, int(c + light * 255))) for c in colour
     )  
     
-def get_tile_type_for_map(value: float):
+def get_tile_type_for_map(value: float):    
     if value < 0.3:
         base = (10, 30, 120) # Water
         t = value / 0.3
