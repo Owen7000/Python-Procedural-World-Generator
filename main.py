@@ -13,7 +13,7 @@ from tkinter import ttk
 width, height = 1000, 1000
 world = [[0 for _ in range(width)] for _ in range(height)]
 
-scale = 40.0
+scale = 20.0
 
 # setup the world thresholds. I have no intention to actually use these for a while. I'm only adding them in so I can make the GUI
 water_level = 0.3
@@ -163,13 +163,13 @@ def get_tile_type_for_map(value:float, moisture:float):
     #     t = (value - 0.6) / 0.4
     #     shade = 0.5 + (t * 0.9)
     #     return darken(base, shade)
-    if value < 0.3:
+    if value < water_level:
         base = (10, 30, 120) # Water
         t = value / 0.3
-    elif value < 0.35:
+    elif value < beach_level:
         base =  (194, 178, 128)  # Sand
         t = (value - 0.3) / 0.1   
-    elif value > 0.7:
+    elif value > mountain_level:
         if moisture < 0.5:
             base = (140, 140, 140) # Dry Rock
         else:
@@ -178,10 +178,10 @@ def get_tile_type_for_map(value:float, moisture:float):
         t = (value - 0.6) / 0.4
         
     else:
-        if moisture < 0.3:
+        if moisture < desert_moisture:
             base = (210, 180, 60) # Desert
             t = (value - 0.3) / 0.1
-        elif moisture < 0.6:
+        elif moisture < forest_moisture:
             base = (50, 160, 60) # Grassland
             t = (value - 0.4) / 0.2
         else:
