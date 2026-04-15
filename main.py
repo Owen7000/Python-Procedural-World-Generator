@@ -10,7 +10,7 @@ from tkinter import ttk
 
 #system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
 
-width, height = 1000, 1000
+width, height = 100, 100
 world = [[0 for _ in range(width)] for _ in range(height)]
 
 scale = 20.0
@@ -19,8 +19,9 @@ scale = 20.0
 water_level = 0.3
 beach_level = 0.35
 mountain_level = 0.7
-forest_moisture = 0.3
-desert_moisture = 0.6
+forest_moisture = 0.6
+desert_moisture = 0.3
+snow_threshold = 0.5
 
 for y in range(height):
     print(f"Generated world row: {y}")
@@ -170,7 +171,7 @@ def get_tile_type_for_map(value:float, moisture:float):
         base =  (194, 178, 128)  # Sand
         t = (value - 0.3) / 0.1   
     elif value > mountain_level:
-        if moisture < 0.5:
+        if moisture < snow_threshold:
             base = (140, 140, 140) # Dry Rock
         else:
             base = (240, 240, 240) # Snow
@@ -318,9 +319,13 @@ forest_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horiz
 forest_slider.set(0.6)
 forest_slider.pack()
 
+snow_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Snow Moisture")
+snow_slider.set(0.5)
+snow_slider.pack()
+
 def redraw_map():
     global water_level, beach_level, mountain_level
-    global desert_moisture, forest_moisture
+    global desert_moisture, forest_moisture, snow_threshold
 
     water_level = water_slider.get()
     beach_level = beach_slider.get()
@@ -328,6 +333,7 @@ def redraw_map():
 
     desert_moisture = desert_slider.get()
     forest_moisture = forest_slider.get()
+    snow_threshold = snow_slider.get()
 
     save_map_to_file(world, width, height, rivers)
     print("Map redrawn")
