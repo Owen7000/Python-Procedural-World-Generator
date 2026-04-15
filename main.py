@@ -5,18 +5,30 @@ from os import system
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import tkinter as tk
+from tkinter import ttk
+import customtkinter
 
 #system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
-#
+
 width, height = 100, 100
 world = [[0 for _ in range(width)] for _ in range(height)]
 
 scale = 20.0
 
+# setup the world thresholds. I have no intention to actually use these for a while. I'm only adding them in so I can make the GUI
+water_level = 0.3
+beach_level = 0.35
+mountain_level = 0.7
+forest_moisture = 0.6
+desert_moisture = 0.3
+snow_threshold = 0.5
+
 for y in range(height):
+    print(f"Generated world row: {y}")
     for x in range(width):
         #system("cls")
-        print(f"Generating world pixel: ({x}, {y})")
+        # print(f"Generating world pixel: ({x}, {y})")
         value = pnoise2(x/scale, y/scale)
         world[y][x] = (value + 1) / 2
         
@@ -25,9 +37,10 @@ moisture_map = [[0 for _ in range(width)] for _ in range(height)]
 moisture_scale = 50.0
 
 for y in range(height):
+    print(f"Generated moisture row: {y}")
     for x in range(width):
         #system("cls")
-        print(f"Generating moisture pixel: ({x}, {y})")
+        # print(f"Generating moisture pixel: ({x}, {y})")
         value = pnoise2(x / moisture_scale + 100, y / moisture_scale + 100)
         moisture_map[y][x] = (value + 1) / 2
         
@@ -152,14 +165,14 @@ def get_tile_type_for_map(value:float, moisture:float):
     #     t = (value - 0.6) / 0.4
     #     shade = 0.5 + (t * 0.9)
     #     return darken(base, shade)
-    if value < 0.3:
+    if value < water_level:
         base = (10, 30, 120) # Water
         t = value / 0.3
-    elif value < 0.35:
+    elif value < beach_level:
         base =  (194, 178, 128)  # Sand
         t = (value - 0.3) / 0.1   
-    elif value > 0.7:
-        if moisture < 0.3:
+    elif value > mountain_level:
+        if moisture < snow_threshold:
             base = (140, 140, 140) # Dry Rock
         else:
             base = (240, 240, 240) # Snow
@@ -167,10 +180,10 @@ def get_tile_type_for_map(value:float, moisture:float):
         t = (value - 0.6) / 0.4
         
     else:
-        if moisture < 0.3:
+        if moisture < desert_moisture:
             base = (210, 180, 60) # Desert
             t = (value - 0.3) / 0.1
-        elif moisture < 0.6:
+        elif moisture < forest_moisture:
             base = (50, 160, 60) # Grassland
             t = (value - 0.4) / 0.2
         else:
@@ -222,8 +235,10 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
             
             # #system("cls")
             current_pixel += 1
-            percentage = round(( current_pixel / total_pixels ) * 100, 2)
-            print(f"{percentage}% complete.")
+        
+        percentage = round(( current_pixel / total_pixels ) * 100, 2)
+        print(f"{percentage}% complete.")
+
             
     image.save("output.png")
 
@@ -277,4 +292,81 @@ def plot_world_3d(world):
     
     plt.show()
     
-plot_world_3d(world)
+# plot_world_3d(world)
+
+# I'm adding in a GUI, because I'm fedup having to rerun the entire script every time I change a threshold.
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("blue")
+
+root = customtkinter.CTk()
+root.title("World Settings")
+root.geometry("400x700")
+
+
+def create_slider(label_text, default_value):
+    label = customtkinter.CTkLabel(root, text=label_text)
+    label.pack(pady=(10, 0))
+
+    value_label = customtkinter.CTkLabel(
+        root,
+        text=f"{default_value:.2f}",
+        font=("Arial", 12, "bold")
+    )
+    value_label.pack()
+
+    def update_label(value):
+        value_label.configure(text=f"{float(value):.2f}")
+
+    slider = customtkinter.CTkSlider(
+        root,
+        from_=0,
+        to=1,
+        number_of_steps=100,
+        command=update_label
+    )
+    slider.set(default_value)
+    slider.pack(fill="x", padx=20)
+
+    return slider
+
+
+# --- Sliders ---
+water_slider = create_slider("Water Level", 0.30)
+beach_slider = create_slider("Beach Level", 0.35)
+mountain_slider = create_slider("Mountain Level", 0.70)
+desert_slider = create_slider("Desert Moisture", 0.30)
+forest_slider = create_slider("Forest Moisture", 0.60)
+snow_slider = create_slider("Snow Moisture", 0.50)
+
+
+def redraw_map():
+    global water_level, beach_level, mountain_level
+    global desert_moisture, forest_moisture, snow_threshold
+
+    water_level = water_slider.get()
+    beach_level = beach_slider.get()
+    mountain_level = mountain_slider.get()
+
+    desert_moisture = desert_slider.get()
+    forest_moisture = forest_slider.get()
+    snow_threshold = snow_slider.get()
+
+    print(f"Water Level: {water_level:.2f}")
+    print(f"Beach Level: {beach_level:.2f}")
+    print(f"Mountain Level: {mountain_level:.2f}")
+    print(f"Desert Moisture: {desert_moisture:.2f}")
+    print(f"Forest Moisture: {forest_moisture:.2f}")
+    print(f"Snow Moisture: {snow_threshold:.2f}")
+
+    save_map_to_file(world, width, height, rivers)
+    print("Map redrawn")
+
+
+redraw_button = customtkinter.CTkButton(
+    root,
+    text="Redraw Map",
+    command=redraw_map
+)
+redraw_button.pack(pady=20)
+
+root.mainloop()
