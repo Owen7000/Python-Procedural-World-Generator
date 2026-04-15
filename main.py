@@ -293,3 +293,46 @@ def plot_world_3d(world):
 # plot_world_3d(world)
 
 # I'm adding in a GUI, because I'm fedup having to rerun the entire script every time I change a threshold.
+
+root = tk.Tk()
+root.title("World Settings")
+
+water_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01,
+                        orient="horizontal", label="Water Level")
+water_slider.set(0.3)
+water_slider.pack()
+
+beach_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Beach Level")
+beach_slider.set(0.35)
+beach_slider.pack()
+
+mountain_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Mountain Level")
+mountain_slider.set(0.7)
+mountain_slider.pack()
+
+desert_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Desert Moisture")
+desert_slider.set(0.3)
+desert_slider.pack()
+
+forest_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Forest Moisture")
+forest_slider.set(0.6)
+forest_slider.pack()
+
+def redraw_map():
+    global water_level, beach_level, mountain_level
+    global desert_moisture, forest_moisture
+
+    water_level = water_slider.get()
+    beach_level = beach_slider.get()
+    mountain_level = mountain_slider.get()
+
+    desert_moisture = desert_slider.get()
+    forest_moisture = forest_slider.get()
+
+    save_map_to_file(world, width, height, rivers)
+    print("Map redrawn")
+
+redraw_button = tk.Button(root, text="Redraw Map", command=redraw_map)
+redraw_button.pack()
+
+root.mainloop()
