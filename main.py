@@ -2,18 +2,34 @@ from random import randint
 from noise import pnoise2
 from PIL import Image
 from os import system
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
-system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
-
-width, height = 1000, 1000
+#system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
+#
+width, height = 100, 100
 world = [[0 for _ in range(width)] for _ in range(height)]
 
-scale = 200.0
+scale = 20.0
 
 for y in range(height):
     for x in range(width):
+        #system("cls")
+        print(f"Generating world pixel: ({x}, {y})")
         value = pnoise2(x/scale, y/scale)
         world[y][x] = (value + 1) / 2
+        
+moisture_map = [[0 for _ in range(width)] for _ in range(height)]
+
+moisture_scale = 50.0
+
+for y in range(height):
+    for x in range(width):
+        #system("cls")
+        print(f"Generating moisture pixel: ({x}, {y})")
+        value = pnoise2(x / moisture_scale + 100, y / moisture_scale + 100)
+        moisture_map[y][x] = (value + 1) / 2
         
 def get_tile_type(value):
     if value < 0.3:
@@ -67,6 +83,9 @@ def distance_to_river(x:int, y:int, rivers, max_dist:int=3):
     return None    
 
 def generate_rivers(world, count=30, max_length=300):
+    #system("cls")
+    print("Generating rivers")
+    
     flow_map = {}
     rivers = set()
     
@@ -112,27 +131,51 @@ def apply_lighting(colour:tuple[int, int, int], light:float):
         min(255, max(0, int(c + light * 255))) for c in colour
     )  
     
-def get_tile_type_for_map(value: float):    
+def get_tile_type_for_map(value:float, moisture:float):    
+    # if value < 0.3:
+    #     base = (10, 30, 120) # Water
+    #     t = value / 0.3
+    # elif value < 0.4:
+    #     base = (70, 130, 180) # Shallow Water
+    #     t = (value - 0.3) / 0.1
+    # elif value < 0.45:
+    #     base =  (194, 178, 128)  # Sand
+    #     t = (value - 0.3) / 0.1
+    # elif value < 0.6:
+    #     base = (50, 160, 60) # Grass
+    #     t = (value - 0.4) / 0.2
+    # elif value > 0.75:
+    #     base = (240, 240, 240) # Snow
+    #     t = (value - 0.6) / 0.4
+    # else:
+    #     base = (120, 120, 120) # Mountain
+    #     t = (value - 0.6) / 0.4
+    #     shade = 0.5 + (t * 0.9)
+    #     return darken(base, shade)
     if value < 0.3:
         base = (10, 30, 120) # Water
         t = value / 0.3
-    elif value < 0.4:
-        base = (70, 130, 180) # Shallow Water
-        t = (value - 0.3) / 0.1
-    elif value < 0.45:
+    elif value < 0.35:
         base =  (194, 178, 128)  # Sand
-        t = (value - 0.3) / 0.1
-    elif value < 0.6:
-        base = (50, 160, 60) # Grass
-        t = (value - 0.4) / 0.2
-    elif value > 0.75:
-        base = (240, 240, 240) # Snow
+        t = (value - 0.3) / 0.1   
+    elif value > 0.7:
+        if moisture < 0.3:
+            base = (140, 140, 140) # Dry Rock
+        else:
+            base = (240, 240, 240) # Snow
+            
         t = (value - 0.6) / 0.4
+        
     else:
-        base = (120, 120, 120) # Mountain
-        t = (value - 0.6) / 0.4
-        shade = 0.5 + (t * 0.9)
-        return darken(base, shade)
+        if moisture < 0.3:
+            base = (210, 180, 60) # Desert
+            t = (value - 0.3) / 0.1
+        elif moisture < 0.6:
+            base = (50, 160, 60) # Grassland
+            t = (value - 0.4) / 0.2
+        else:
+            base = (16, 120, 40) # Forest
+            t = (value - 0.4) / 0.2
 
     shade = 0.6 + (t * 0.6)
     return darken(base, shade)
@@ -140,6 +183,11 @@ def get_tile_type_for_map(value: float):
 def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
     image = Image.new('RGB', (width, height), color=(0,0,0))
     pixels = image.load()
+    
+    total_pixels:int = width * height
+    current_pixel:int = 0
+    
+    print(f"Done: {current_pixel} of {total_pixels}")
     
     for row_index, row in enumerate(world):
         for column_index, column in enumerate(row):
@@ -156,7 +204,10 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
                     base_colour = (50, 130, 220)
                     
             else:
-                base_colour = get_tile_type_for_map(column)
+                height_value = world[row_index][column_index]
+                moisture_value = moisture_map[row_index][column_index]
+
+                base_colour = get_tile_type_for_map(height_value, moisture_value)
                 
                 dist = distance_to_river(x, y, rivers, max_dist=3)
                 
@@ -169,8 +220,61 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
             
             pixels[column_index, row_index] = final_colour
             
+            # #system("cls")
+            current_pixel += 1
+            percentage = round(( current_pixel / total_pixels ) * 100, 2)
+            print(f"{percentage}% complete.")
+            
     image.save("output.png")
 
 rivers, flow_map = generate_rivers(world, count=10)
 
 save_map_to_file(world, width, height, rivers)
+
+def plot_world_3d(world):
+    height = len(world)
+    width = len(world[0])
+    
+    colour_map = []
+
+    for y in range(height):
+        row_colours = []
+        for x in range(width):
+            h = world[y][x]
+            m = moisture_map[y][x]
+            
+            
+            if (x, y) in rivers:
+                flow = flow_map.get((x, y), 1)
+                
+                if flow > 6:
+                    r, g, b = (20, 80, 180)
+                elif flow > 3:
+                    r, g, b = (30, 100, 200)
+                else:
+                    r, g, b = (50, 130, 220)
+            else:
+                r, g, b = get_tile_type_for_map(h, m)
+            
+            # matplotlib expects 0–1, not 0–255
+            row_colours.append((r/255, g/255, b/255))
+        
+        colour_map.append(row_colours)
+
+    colour_map = np.array(colour_map)
+    
+    X, Y = np.meshgrid(range(width), range(height))
+    Z = np.array(world)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    ax.plot_surface(X, Y, Z, facecolors=colour_map, shade=False)
+    ax.view_init(elev=45, azim=135)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+    
+    plt.show()
+    
+plot_world_3d(world)

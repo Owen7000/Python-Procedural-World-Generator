@@ -83,5 +83,16 @@ These first three images show the same section of the map, in three different re
 
 ---
 
-This last image shows a 1000px by 1000px example which I have a scale of 40 applied to. This means it is roughly the same visual scale as the second example image. Just with an extra 100x the map generated.
+This next image shows a 1000px by 1000px example which I have a scale of 40 applied to. This means it is roughly the same visual scale as the second example image. Just with an extra 100x the map generated.
 ![1000x1000px image with a scale of 40](examples/1000x1000-scale-40.png)
+
+---
+
+In the following two images, I am demonstrating both new features which I've added.
+You can see that there is now extra sand and some darker green areas on the mountains, and next to bodies of water. This is from my new moisture map. This will make desert regions, and some forests instead of everything being just, rock, water, or grass.
+
+![Best way I can describe it is a map showing some different visually distinct biomes. They're not very well implemented, but you can see grass, forests, mountains, lakes, rivers and a desert](examples/Moisture%20mapping.png)
+
+In the second image, you can see that you can now visualise the map in 3D once it is generated. This reveals some... intersting issues with my map generation, to say the least. Yeah so essentially the way I'm generating the map looks very humorous when you look at it in matplotlib. Maybe when I possibly eventualyl get round to  implementing my own 3D renderer, I can make it better suited for my use case, but I feel like it might still look dodgy. 
+
+![A 3D view of the above map in matplotlib, showing sizes to be massively exagerated. I've tried to multiply the z values by 0.1, but that didn't seem to make a difference. Just have to wait and see what I can come up with at a later date](examples/3D%20view%20of%20moisture%20mapping.png)
