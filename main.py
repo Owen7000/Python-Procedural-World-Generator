@@ -7,6 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import tkinter as tk
 from tkinter import ttk
+import customtkinter
 
 #system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
 
@@ -294,34 +295,49 @@ def plot_world_3d(world):
 # plot_world_3d(world)
 
 # I'm adding in a GUI, because I'm fedup having to rerun the entire script every time I change a threshold.
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("blue")
 
-root = tk.Tk()
+root = customtkinter.CTk()
 root.title("World Settings")
+root.geometry("400x700")
 
-water_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01,
-                        orient="horizontal", label="Water Level")
-water_slider.set(0.3)
-water_slider.pack()
 
-beach_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Beach Level")
-beach_slider.set(0.35)
-beach_slider.pack()
+def create_slider(label_text, default_value):
+    label = customtkinter.CTkLabel(root, text=label_text)
+    label.pack(pady=(10, 0))
 
-mountain_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Mountain Level")
-mountain_slider.set(0.7)
-mountain_slider.pack()
+    value_label = customtkinter.CTkLabel(
+        root,
+        text=f"{default_value:.2f}",
+        font=("Arial", 12, "bold")
+    )
+    value_label.pack()
 
-desert_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Desert Moisture")
-desert_slider.set(0.3)
-desert_slider.pack()
+    def update_label(value):
+        value_label.configure(text=f"{float(value):.2f}")
 
-forest_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Forest Moisture")
-forest_slider.set(0.6)
-forest_slider.pack()
+    slider = customtkinter.CTkSlider(
+        root,
+        from_=0,
+        to=1,
+        number_of_steps=100,
+        command=update_label
+    )
+    slider.set(default_value)
+    slider.pack(fill="x", padx=20)
 
-snow_slider = tk.Scale(root, from_=0.0, to=1.0, resolution=0.01, orient="horizontal", label="Snow Moisture")
-snow_slider.set(0.5)
-snow_slider.pack()
+    return slider
+
+
+# --- Sliders ---
+water_slider = create_slider("Water Level", 0.30)
+beach_slider = create_slider("Beach Level", 0.35)
+mountain_slider = create_slider("Mountain Level", 0.70)
+desert_slider = create_slider("Desert Moisture", 0.30)
+forest_slider = create_slider("Forest Moisture", 0.60)
+snow_slider = create_slider("Snow Moisture", 0.50)
+
 
 def redraw_map():
     global water_level, beach_level, mountain_level
@@ -335,10 +351,22 @@ def redraw_map():
     forest_moisture = forest_slider.get()
     snow_threshold = snow_slider.get()
 
+    print(f"Water Level: {water_level:.2f}")
+    print(f"Beach Level: {beach_level:.2f}")
+    print(f"Mountain Level: {mountain_level:.2f}")
+    print(f"Desert Moisture: {desert_moisture:.2f}")
+    print(f"Forest Moisture: {forest_moisture:.2f}")
+    print(f"Snow Moisture: {snow_threshold:.2f}")
+
     save_map_to_file(world, width, height, rivers)
     print("Map redrawn")
 
-redraw_button = tk.Button(root, text="Redraw Map", command=redraw_map)
-redraw_button.pack()
+
+redraw_button = customtkinter.CTkButton(
+    root,
+    text="Redraw Map",
+    command=redraw_map
+)
+redraw_button.pack(pady=20)
 
 root.mainloop()
