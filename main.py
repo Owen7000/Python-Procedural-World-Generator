@@ -5,18 +5,28 @@ from os import system
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import tkinter as tk
+from tkinter import ttk
 
 #system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
-#
-width, height = 100, 100
+
+width, height = 1000, 1000
 world = [[0 for _ in range(width)] for _ in range(height)]
 
-scale = 20.0
+scale = 40.0
+
+# setup the world thresholds. I have no intention to actually use these for a while. I'm only adding them in so I can make the GUI
+water_level = 0.3
+beach_level = 0.35
+mountain_level = 0.7
+forest_moisture = 0.3
+desert_moisture = 0.6
 
 for y in range(height):
+    print(f"Generated world row: {y}")
     for x in range(width):
         #system("cls")
-        print(f"Generating world pixel: ({x}, {y})")
+        # print(f"Generating world pixel: ({x}, {y})")
         value = pnoise2(x/scale, y/scale)
         world[y][x] = (value + 1) / 2
         
@@ -25,9 +35,10 @@ moisture_map = [[0 for _ in range(width)] for _ in range(height)]
 moisture_scale = 50.0
 
 for y in range(height):
+    print(f"Generated moisture row: {y}")
     for x in range(width):
         #system("cls")
-        print(f"Generating moisture pixel: ({x}, {y})")
+        # print(f"Generating moisture pixel: ({x}, {y})")
         value = pnoise2(x / moisture_scale + 100, y / moisture_scale + 100)
         moisture_map[y][x] = (value + 1) / 2
         
@@ -159,7 +170,7 @@ def get_tile_type_for_map(value:float, moisture:float):
         base =  (194, 178, 128)  # Sand
         t = (value - 0.3) / 0.1   
     elif value > 0.7:
-        if moisture < 0.3:
+        if moisture < 0.5:
             base = (140, 140, 140) # Dry Rock
         else:
             base = (240, 240, 240) # Snow
@@ -222,8 +233,10 @@ def save_map_to_file(world:list[list[int]], width:int, height:int, rivers):
             
             # #system("cls")
             current_pixel += 1
-            percentage = round(( current_pixel / total_pixels ) * 100, 2)
-            print(f"{percentage}% complete.")
+        
+        percentage = round(( current_pixel / total_pixels ) * 100, 2)
+        print(f"{percentage}% complete.")
+
             
     image.save("output.png")
 
@@ -277,4 +290,6 @@ def plot_world_3d(world):
     
     plt.show()
     
-plot_world_3d(world)
+# plot_world_3d(world)
+
+# I'm adding in a GUI, because I'm fedup having to rerun the entire script every time I change a threshold.
