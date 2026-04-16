@@ -295,6 +295,7 @@ def plot_world_3d(world):
 # plot_world_3d(world)
 
 # I'm adding in a GUI, because I'm fedup having to rerun the entire script every time I change a threshold.
+customtkinter.set_default_color_theme("theme.json")
 root = customtkinter.CTk()
 root.title("World Settings")
 root.geometry("1000x700")

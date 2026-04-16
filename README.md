@@ -96,3 +96,6 @@ You can see that there is now extra sand and some darker green areas on the moun
 In the second image, you can see that you can now visualise the map in 3D once it is generated. This reveals some... intersting issues with my map generation, to say the least. Yeah so essentially the way I'm generating the map looks very humorous when you look at it in matplotlib. Maybe when I possibly eventualyl get round to  implementing my own 3D renderer, I can make it better suited for my use case, but I feel like it might still look dodgy. 
 
 ![A 3D view of the above map in matplotlib, showing sizes to be massively exagerated. I've tried to multiply the z values by 0.1, but that didn't seem to make a difference. Just have to wait and see what I can come up with at a later date](examples/3D%20view%20of%20moisture%20mapping.png)
+
+## Credits
+The customtkinter GUI theme is the "red theme" which can be found [Here](https://github.com/a13xe/CTkThemesPack/tree/main)
