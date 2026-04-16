@@ -1,6 +1,6 @@
 from random import randint
 from noise import pnoise2
-from PIL import Image
+from PIL import Image, ImageTk
 from os import system
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -11,10 +11,10 @@ import customtkinter
 
 #system("cls") # All that is needed for windows to allow ANSI codes. I still think it's stupid
 
-width, height = 100, 100
+width, height = 1000, 1000
 world = [[0 for _ in range(width)] for _ in range(height)]
 
-scale = 20.0
+scale = 200.0
 
 # setup the world thresholds. I have no intention to actually use these for a while. I'm only adding them in so I can make the GUI
 water_level = 0.3
@@ -295,20 +295,26 @@ def plot_world_3d(world):
 # plot_world_3d(world)
 
 # I'm adding in a GUI, because I'm fedup having to rerun the entire script every time I change a threshold.
-customtkinter.set_appearance_mode("dark")
-customtkinter.set_default_color_theme("blue")
-
+customtkinter.set_default_color_theme("theme.json")
 root = customtkinter.CTk()
 root.title("World Settings")
-root.geometry("400x700")
+root.geometry("1000x700")
 
+# Left side for controls
+controls_frame = customtkinter.CTkFrame(root)
+controls_frame.pack(side="left", fill="y", padx=20, pady=20)
+
+# Right side for image preview
+preview_frame = customtkinter.CTkFrame(root)
+preview_frame.pack(side="right", fill="both", expand=True, padx=20, pady=20)
+preview_frame.bind("<Configure>", lambda event: update_preview())
 
 def create_slider(label_text, default_value):
-    label = customtkinter.CTkLabel(root, text=label_text)
+    label = customtkinter.CTkLabel(controls_frame, text=label_text)
     label.pack(pady=(10, 0))
 
     value_label = customtkinter.CTkLabel(
-        root,
+        controls_frame,
         text=f"{default_value:.2f}",
         font=("Arial", 12, "bold")
     )
@@ -318,7 +324,7 @@ def create_slider(label_text, default_value):
         value_label.configure(text=f"{float(value):.2f}")
 
     slider = customtkinter.CTkSlider(
-        root,
+        controls_frame,
         from_=0,
         to=1,
         number_of_steps=100,
@@ -338,6 +344,38 @@ desert_slider = create_slider("Desert Moisture", 0.30)
 forest_slider = create_slider("Forest Moisture", 0.60)
 snow_slider = create_slider("Snow Moisture", 0.50)
 
+# --- Hopefully an image display ---
+image_label = customtkinter.CTkLabel(preview_frame, text="")
+image_label.pack(pady=20)
+
+def update_preview():
+    image = Image.open("output.png")
+
+    frame_width = preview_frame.winfo_width()
+    frame_height = preview_frame.winfo_height()
+
+    if frame_width < 10:
+        frame_width = 500
+    if frame_height < 10:
+        frame_height = 500
+
+    image_width, image_height = image.size
+
+    width_ratio = frame_width / image_width
+    height_ratio = frame_height / image_height
+
+    scale = min(width_ratio, height_ratio)
+
+    new_width = int(image_width * scale)
+    new_height = int(image_height * scale)
+
+    image = image.resize((new_width, new_height))
+
+    photo = ImageTk.PhotoImage(image)
+
+    image_label.configure(image=photo, text="")
+    image_label.image = photo
+    
 
 def redraw_map():
     global water_level, beach_level, mountain_level
@@ -351,22 +389,18 @@ def redraw_map():
     forest_moisture = forest_slider.get()
     snow_threshold = snow_slider.get()
 
-    print(f"Water Level: {water_level:.2f}")
-    print(f"Beach Level: {beach_level:.2f}")
-    print(f"Mountain Level: {mountain_level:.2f}")
-    print(f"Desert Moisture: {desert_moisture:.2f}")
-    print(f"Forest Moisture: {forest_moisture:.2f}")
-    print(f"Snow Moisture: {snow_threshold:.2f}")
-
     save_map_to_file(world, width, height, rivers)
-    print("Map redrawn")
+    update_preview()
 
+    print("Map redrawn")
+    
 
 redraw_button = customtkinter.CTkButton(
-    root,
+    controls_frame,
     text="Redraw Map",
     command=redraw_map
 )
 redraw_button.pack(pady=20)
 
+update_preview()
 root.mainloop()
