@@ -97,5 +97,9 @@ In the second image, you can see that you can now visualise the map in 3D once i
 
 ![A 3D view of the above map in matplotlib, showing sizes to be massively exagerated. I've tried to multiply the z values by 0.1, but that didn't seem to make a difference. Just have to wait and see what I can come up with at a later date](examples/3D%20view%20of%20moisture%20mapping.png)
 
+---
+I got fedup having to wait for the entire map to regenerate every time I changed the thresholds for the `get_tile_type_for_map` function. So I have made a GUI with CustomTkinter that lets me change these thresholds and then redraw the map, without needing to redo all the noise filtering. The image below shows the current state of the GUI.
+![The image shows my GUI that lets me change the thresholds for the pixel colour function](examples/GUI%20View.png)
+
 ## Credits
 The customtkinter GUI theme is the "red theme" which can be found [Here](https://github.com/a13xe/CTkThemesPack/tree/main)
